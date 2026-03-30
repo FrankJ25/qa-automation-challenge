@@ -1,0 +1,79 @@
+trigger:
+  - main
+
+pr:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: UI_Tests
+    displayName: 'Run UI tests - Playwright + Cucumber'
+    jobs:
+      - job: Run_UI
+        displayName: 'Execute UI automation'
+        steps:
+          - checkout: self
+            clean: true
+
+          - script: |
+              cd web-ui-automation
+              npm ci
+              npx playwright install --with-deps
+            displayName: 'Install UI dependencies'
+
+          - script: |
+              cd web-ui-automation
+              npm test
+            displayName: 'Run UI tests'
+            continueOnError: true
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish UI report artifact'
+            condition: always()
+            inputs:
+              targetPath: 'web-ui-automation/reports'
+              artifact: 'ui-cucumber-report'
+              publishLocation: 'pipeline'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish UI Allure results'
+            condition: always()
+            inputs:
+              targetPath: 'web-ui-automation/allure-results'
+              artifact: 'ui-allure-results'
+              publishLocation: 'pipeline'
+
+  - stage: API_Tests
+    displayName: 'Run API tests - Karate DSL'
+    dependsOn: UI_Tests
+    jobs:
+      - job: Run_API
+        displayName: 'Execute API automation'
+        steps:
+          - checkout: self
+            clean: true
+
+          - script: |
+              cd api-automation-karate
+              mvn -v
+              mvn clean test
+            displayName: 'Run Karate tests'
+            continueOnError: true
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Karate report artifact'
+            condition: always()
+            inputs:
+              targetPath: 'api-automation-karate/target/karate-reports'
+              artifact: 'api-karate-report'
+              publishLocation: 'pipeline'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish API Allure results'
+            condition: always()
+            inputs:
+              targetPath: 'api-automation-karate/allure-results'
+              artifact: 'api-allure-results'
+              publishLocation: 'pipeline'
