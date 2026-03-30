@@ -4,9 +4,9 @@
 
 Este proyecto implementa una solución completa de automatización de pruebas para:
 
-* 🌐 **Frontend (UI)** usando **Playwright + Cucumber (BDD)**
-* 🔗 **API** usando **Karate DSL**
-* 📊 **Reportes** con **Allure**
+*  **Frontend (UI)** usando **Playwright + Cucumber (BDD)**
+*  **API** usando **Karate DSL**
+*  **Reportes** con **Allure**
 
 El objetivo es validar flujos end-to-end y operaciones CRUD de usuarios, aplicando buenas prácticas de automatización.
 
@@ -59,16 +59,16 @@ ENCORACHALLENGE/
 
 ---
 
-## 🌐 Pruebas UI
+##  Pruebas UI
 
-### 🔹 Funcionalidades cubiertas
+###  Funcionalidades cubiertas
 
 * Login válido e inválido
 * Agregar productos al carrito
 * Validación de carrito
 * Flujo completo de compra
 
-### ▶️ Ejecutar pruebas UI
+###  Ejecutar pruebas UI
 
 ```bash
 cd web-ui-automation
@@ -78,9 +78,9 @@ npm test
 
 ---
 
-## 🔗 Pruebas API (ServeRest)
+##  Pruebas API (ServeRest)
 
-### 🔹 Funcionalidades cubiertas
+###  Funcionalidades cubiertas
 
 * GET /usuarios → listar usuarios
 * POST /usuarios → crear usuario
@@ -88,14 +88,14 @@ npm test
 * PUT /usuarios/{id} → actualizar usuario
 * DELETE /usuarios/{id} → eliminar usuario
 
-### 🔹 Casos negativos
+###  Casos negativos
 
 * Usuario duplicado
 * Usuario inexistente
 
 ---
 
-### ▶️ Ejecutar pruebas API
+### Ejecutar pruebas API
 
 ```bash
 cd api-automation-karate
@@ -106,13 +106,13 @@ mvn clean test
 
 ## Reportes con Allure
 
-### ▶ Generar reporte
+###  Generar reporte
 
 ```bash
 mvn allure:report
 ```
 
-### ▶️ Levantar reporte
+###  Levantar reporte
 
 ```bash
 mvn allure:serve
@@ -149,6 +149,79 @@ http://127.0.0.1:xxxx
 
 ---
 
+
+##  CI/CD - Azure DevOps
+ Configuración
+
+Se implementó un pipeline usando:
+
+Azure DevOps Pipelines
+Agente self-hosted (local)
+
+GitHub Repo
+     ↓
+Azure DevOps Pipeline
+     ↓
+Self-hosted Agent (Local Machine)
+     ↓
+Ejecución:
+   - UI Tests (Playwright)
+   - API Tests (Karate)
+     ↓
+Generación de reportes
+
+## Pipeline.YAML
+trigger:
+  - main
+
+pool:
+  name: Default
+
+stages:
+
+- stage: UI_Tests
+  jobs:
+    - job: Run_UI
+      steps:
+        - checkout: self
+
+        - script: |
+            cd web-ui-automation
+            npm install
+            npx playwright install
+          displayName: 'Install UI dependencies'
+
+        - script: |
+            cd web-ui-automation
+            npm test
+          displayName: 'Run UI tests'
+
+- stage: API_Tests
+  dependsOn: UI_Tests
+  jobs:
+    - job: Run_API
+      steps:
+        - checkout: self
+
+        - script: |
+            cd api-automation-karate
+            mvn clean test
+          displayName: 'Run API tests'
+
+
+## Se configuró un agente local en Windows:
+
+Azure Pipelines Agent
+Pool: Default
+Ejecución en máquina local
+
+Esto permite:
+
+Evitar restricciones de parallelism
+Control total del entorno
+Ejecución real de navegador (Playwright)
+
+
 ##  Buenas prácticas implementadas
 
 * ✔ Datos dinámicos para evitar duplicidad
@@ -184,5 +257,5 @@ Este proyecto demuestra:
 * Uso de herramientas modernas
 * Diseño escalable y mantenible
 * Reportería profesional
-
+* Integracion CI/CD
 ---
