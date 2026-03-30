@@ -1,0 +1,42 @@
+trigger:
+  - main
+
+pool:
+  name: Default   # tu agente local
+
+stages:
+
+# ======================
+# UI TESTS (Playwright)
+# ======================
+- stage: UI_Tests
+  jobs:
+    - job: Run_UI
+      steps:
+        - checkout: self
+
+        - script: |
+            cd web-ui-automation
+            npm install
+            npx playwright install
+          displayName: 'Install UI dependencies'
+
+        - script: |
+            cd web-ui-automation
+            npm test
+          displayName: 'Run UI tests'
+
+# ======================
+# API TESTS (Karate)
+# ======================
+- stage: API_Tests
+  dependsOn: UI_Tests
+  jobs:
+    - job: Run_API
+      steps:
+        - checkout: self
+
+        - script: |
+            cd api-automation-karate
+            mvn clean test
+          displayName: 'Run API tests'
